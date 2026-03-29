@@ -1,0 +1,39 @@
+name: tnp_connect_app
+description: "Training and Placement Cell App"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # Firebase
+  firebase_core: ^3.1.0
+  firebase_auth: ^5.1.0
+  cloud_firestore: ^5.1.0
+  firebase_storage: ^12.1.0
+  firebase_messaging: ^15.0.0
+
+  # UI
+  google_fonts: ^6.2.1
+
+  # Utilities
+  shared_preferences: ^2.2.3
+  image_picker: ^1.1.2
+  url_launcher: ^6.3.0
+  cached_network_image: ^3.3.1
+
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
