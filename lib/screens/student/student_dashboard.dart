@@ -7,6 +7,10 @@ import 'tracker_screen.dart';
 import 'profile_screen.dart';
 import 'notification_screen.dart';
 
+// 🔥 NEW IMPORTS
+import 'experience_wall_screen.dart';
+import 'add_experience_screen.dart';
+
 class StudentDashboard extends StatelessWidget {
   const StudentDashboard({super.key});
 
@@ -89,6 +93,13 @@ class StudentDashboard extends StatelessWidget {
                   _card(context, "Notifications",
                       Icons.notifications,
                       const NotificationScreen()),
+
+                  // 🔥 NEW FEATURE
+                  _card(context, "Experience Wall", Icons.forum,
+                      const ExperienceWallScreen()),
+
+                  _card(context, "Add Experience", Icons.add_circle,
+                      const AddExperienceScreen()),
                 ],
               ),
             ),

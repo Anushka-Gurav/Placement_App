@@ -4,10 +4,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../auth/login_screen.dart';
 import 'add_company_screen.dart';
-import 'admin_company_list_screen.dart.dart';
+import 'admin_company_list_screen.dart'; // ✅ FIXED
 import 'admin_notification_screen.dart';
 import 'admin_application_screen.dart';
 import 'admin_students_year_screen.dart';
+
+// 🔥 NEW IMPORT
+import 'admin_experience_screen.dart';
+
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({super.key});
 
@@ -83,6 +87,7 @@ class AdminDashboard extends StatelessWidget {
                     _liveStat("Companies", "companies"),
                     _liveStat("Applications", "applications"),
                     _liveStat("Notifications", "notifications"),
+                    _liveStat("Experiences", "experience_posts"), // 🔥 NEW
                   ],
                 )
               ],
@@ -124,20 +129,27 @@ class AdminDashboard extends StatelessWidget {
                         Navigator.push(context,
                             MaterialPageRoute(builder: (_) => AdminApplicationScreen()));
                       }),
-                  _card(
-                    Icons.school,
-                    "Students",
-                    const Color(0xFF00A896),
-                        () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AdminStudentsYearScreen(),
-                        ),
-                      );
-                    },
-                  ),
 
+                  _card(Icons.school, "Students",
+                      const Color(0xFF00A896), () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AdminStudentsYearScreen(),
+                          ),
+                        );
+                      }),
+
+                  // 🔥 NEW FEATURE
+                  _card(Icons.rate_review, "Moderate Experience",
+                      const Color(0xFF1F3C44), () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AdminExperienceScreen(),
+                          ),
+                        );
+                      }),
                 ],
               ),
             ),
