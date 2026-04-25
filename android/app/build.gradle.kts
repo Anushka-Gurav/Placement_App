@@ -6,7 +6,6 @@ plugins {
     // ✅ KEEP ONLY THIS (NO VERSION HERE)
     id("com.google.gms.google-services")
 
-
 }
 android {
     namespace = "com.example.tnp_connect_app"
