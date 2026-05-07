@@ -18,39 +18,32 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool isLoading = false;
 
-  void login() async {
-    setState(() => isLoading = true);
-
-    try {
-      print("Login started");
-
-      final cred = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(
-        email: email.text.trim(),
-        password: password.text.trim(),
-      );
-
-      print("Auth success");
-
-      final userData =
-      await FirestoreService().getUser(cred.user!.uid);
-
-      print("Firestore data: $userData");
-
-      if (userData == null) {
-        throw Exception("User data not found in Firestore");
-      }
-
-      // popup
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => const AlertDialog(
-          content: Text("Login Successful"),
+  // ✅ SUCCESS DIALOG
+  void showSuccessDialog(Map<String, dynamic> userData) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => Dialog(
+        shape:
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(25),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const [
+              Icon(Icons.check_circle, color: Colors.green, size: 70),
+              SizedBox(height: 15),
+              Text("Login Successful 🎉",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              SizedBox(height: 10),
+              Text("Welcome back!", textAlign: TextAlign.center),
+            ],
+          ),
         ),
-      );
+      ),
+    );
 
-      await Future.delayed(const Duration(seconds: 2));
+    Future.delayed(const Duration(seconds: 2), () {
       Navigator.pop(context);
 
       if (userData['role'] == 'admin') {
@@ -64,99 +57,175 @@ class _LoginScreenState extends State<LoginScreen> {
           MaterialPageRoute(builder: (_) => const StudentDashboard()),
         );
       }
+    });
+  }
+
+  // ✅ ERROR DIALOG
+  void showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        shape:
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error, color: Colors.red, size: 70),
+              const SizedBox(height: 15),
+              const Text("Login Failed",
+                  style:
+                  TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              Text(message, textAlign: TextAlign.center),
+              const SizedBox(height: 15),
+
+              // 🔥 USE THEME BUTTON
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("OK"),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void login() async {
+    setState(() => isLoading = true);
+
+    try {
+      final cred = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+        email: email.text.trim(),
+        password: password.text.trim(),
+      );
+
+      final userData =
+      await FirestoreService().getUser(cred.user!.uid);
+
+      if (userData == null) {
+        throw Exception("User data not found");
+      }
+
+      showSuccessDialog(userData);
 
     } catch (e) {
-      print("ERROR: $e");
+      String message = "Login Failed";
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString())),
-      );
+      if (e is FirebaseAuthException) {
+        switch (e.code) {
+          case 'user-not-found':
+            message = "No user found with this email";
+            break;
+          case 'wrong-password':
+            message = "Incorrect password";
+            break;
+          case 'invalid-email':
+            message = "Invalid email format";
+            break;
+          default:
+            message = "Something went wrong";
+        }
+      }
+
+      showErrorDialog(message);
     }
 
     setState(() => isLoading = false);
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF6C63FF), Color(0xFF8E2DE2)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      body: Stack(
+        children: [
+
+          // 🔥 THEMED BACKGROUND
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF141836),
+                  Color(0xFF1E234D),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
           ),
-        ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Card(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
-              elevation: 10,
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
 
-                    const Text("Welcome Back",
+          Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Card(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
+                elevation: 10,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+
+                      const Text(
+                        "Welcome Back",
                         style: TextStyle(
-                            fontSize: 24, fontWeight: FontWeight.bold)),
-
-                    const SizedBox(height: 20),
-
-                    TextField(
-                      controller: email,
-                      decoration: InputDecoration(
-                        labelText: "Email",
-                        prefixIcon: const Icon(Icons.email),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold),
                       ),
-                    ),
 
-                    const SizedBox(height: 15),
+                      const SizedBox(height: 20),
 
-                    TextField(
-                      controller: password,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        labelText: "Password",
-                        prefixIcon: const Icon(Icons.lock),
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                      TextField(
+                        controller: email,
+                        decoration: const InputDecoration(
+                          labelText: "Email",
+                          prefixIcon: Icon(Icons.email),
+                        ),
                       ),
-                    ),
 
-                    const SizedBox(height: 20),
+                      const SizedBox(height: 15),
 
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                      TextField(
+                        controller: password,
+                        obscureText: true,
+                        decoration: const InputDecoration(
+                          labelText: "Password",
+                          prefixIcon: Icon(Icons.lock),
+                        ),
                       ),
-                      onPressed: isLoading ? null : login,
-                      child: isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text("Login"),
-                    ),
 
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const RegisterScreen()),
-                        );
-                      },
-                      child: const Text("Create Account"),
-                    )
-                  ],
+                      const SizedBox(height: 20),
+
+                      // 🔥 NO COLOR HERE → USE THEME
+                      ElevatedButton(
+                        onPressed: isLoading ? null : login,
+                        child: isLoading
+                            ? const CircularProgressIndicator(
+                            color: Colors.white)
+                            : const Text("Login"),
+                      ),
+
+                      TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) =>
+                                const RegisterScreen()),
+                          );
+                        },
+                        child: const Text("Create Account"),
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

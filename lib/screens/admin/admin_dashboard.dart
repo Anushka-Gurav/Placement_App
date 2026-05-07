@@ -1,90 +1,113 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../auth/login_screen.dart';
+
 import 'add_company_screen.dart';
-import 'admin_company_list_screen.dart.dart';
-import 'admin_notification_screen.dart';
+import 'admin_company_list_screen.dart';
 import 'admin_application_screen.dart';
+import 'admin_notification_screen.dart';
 import 'admin_students_year_screen.dart';
+
+import 'add_resource_screen.dart';
+import 'admin_resource_list_screen.dart';
+
 class AdminDashboard extends StatelessWidget {
   const AdminDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFEFF3F5),
+      backgroundColor: const Color(0xFFF5F7FB),
 
       body: Column(
         children: [
 
-          // 🔥 HEADER WITH LOGOUT
+          // 🔥 HEADER
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 45),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 50,
+            ),
+
             decoration: const BoxDecoration(
-              color: Color(0xFF1F3C44),
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF141836),
+                  Color(0xFF1F2A5A),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(30),
                 bottomRight: Radius.circular(30),
               ),
             ),
 
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
+              mainAxisAlignment:
+              MainAxisAlignment.spaceBetween,
+
               children: [
 
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // 🔥 TITLE
+                Column(
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
+
                   children: [
 
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Admin Panel",
-                          style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          "Manage everything easily",
-                          style: TextStyle(color: Colors.white70),
-                        ),
-                      ],
+                    const Text(
+                      "Welcome Admin 👋",
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 16,
+                      ),
                     ),
 
-                    // 🔥 LOGOUT
-                    IconButton(
-                      icon: const Icon(Icons.logout, color: Colors.white),
-                      onPressed: () async {
-                        await FirebaseAuth.instance.signOut();
+                    const SizedBox(height: 5),
 
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const LoginScreen()),
-                              (route) => false,
-                        );
-                      },
+                    Text(
+                      user?.email ?? "",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22,
+                      ),
                     ),
                   ],
                 ),
 
-                const SizedBox(height: 20),
+                // 🔥 LOGOUT
+                IconButton(
+                  icon: const Icon(
+                    Icons.logout,
+                    color: Colors.white,
+                    size: 28,
+                  ),
 
-                // 🔥 LIVE STATS
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _liveStat("Companies", "companies"),
-                    _liveStat("Applications", "applications"),
-                    _liveStat("Notifications", "notifications"),
-                  ],
-                )
+                  onPressed: () async {
+
+                    await FirebaseAuth.instance
+                        .signOut();
+
+                    Navigator.pushAndRemoveUntil(
+                      context,
+
+                      MaterialPageRoute(
+                        builder: (_) =>
+                        const LoginScreen(),
+                      ),
+
+                          (route) => false,
+                    );
+                  },
+                ),
               ],
             ),
           ),
@@ -95,105 +118,158 @@ class AdminDashboard extends StatelessWidget {
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(20),
+
               child: GridView.count(
                 crossAxisCount: 2,
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+
                 children: [
 
-                  _card(Icons.add_business, "Add Company",
-                      const Color(0xFF1F3C44), () {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => AddCompanyScreen()));
-                      }),
-
-                  _card(Icons.business, "View Companies",
-                      const Color(0xFF009688), () {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => AdminCompanyListScreen()));
-                      }),
-
-                  _card(Icons.notifications, "Notifications",
-                      const Color(0xFF4CAF50), () {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => AdminNotificationScreen()));
-                      }),
-
-                  _card(Icons.people, "Applications",
-                      const Color(0xFF6C63FF), () {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => AdminApplicationScreen()));
-                      }),
+                  // 🔥 ADD COMPANY
                   _card(
-                    Icons.school,
-                    "Students",
-                    const Color(0xFF00A896),
-                        () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const AdminStudentsYearScreen(),
-                        ),
-                      );
-                    },
+                    context,
+                    "Add Company",
+                    Icons.add_business,
+                    const AddCompanyScreen(),
+                    Colors.blue,
                   ),
 
+                  // 🔥 VIEW COMPANIES
+                  _card(
+                    context,
+                    "Manage Companies",
+                    Icons.business,
+                    const AdminCompanyListScreen(),
+                    Colors.indigo,
+                  ),
+
+                  // 🔥 APPLICATIONS
+                  _card(
+                    context,
+                    "Applications",
+                    Icons.assignment,
+                    const AdminApplicationScreen(),
+                    Colors.green,
+                  ),
+
+                  // 🔥 STUDENTS
+                  _card(
+                    context,
+                    "Students",
+                    Icons.people,
+                    const AdminStudentsYearScreen(),
+                    Colors.orange,
+                  ),
+
+                  // 🔥 NOTIFICATIONS
+                  _card(
+                    context,
+                    "Notifications",
+                    Icons.notifications,
+                    const AdminNotificationScreen(),
+                    Colors.redAccent,
+                  ),
+
+                  // 🔥 ADD RESOURCE
+                  _card(
+                    context,
+                    "Add Resource",
+                    Icons.library_add,
+                    const AddResourceScreen(),
+                    Colors.teal,
+                  ),
+
+                  // 🔥 MANAGE RESOURCES
+                  _card(
+                    context,
+                    "Manage Resources",
+                    Icons.menu_book,
+                    const AdminResourceListScreen(),
+                    Colors.purple,
+                  ),
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
-  // 🔥 CARD UI
-  Widget _card(IconData icon, String title, Color color, VoidCallback onTap) {
+  // 🔥 CARD WIDGET
+  Widget _card(
+      BuildContext context,
+      String title,
+      IconData icon,
+      Widget screen,
+      Color color,
+      ) {
     return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(22),
+
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => screen,
+          ),
+        );
+      },
+
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+
+          borderRadius:
+          BorderRadius.circular(22),
+
           boxShadow: const [
-            BoxShadow(color: Colors.black12, blurRadius: 10)
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            )
           ],
         ),
+
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment:
+          MainAxisAlignment.center,
+
           children: [
-            CircleAvatar(
-              backgroundColor: color.withOpacity(0.1),
-              child: Icon(icon, color: color),
+
+            // 🔥 ICON BG
+            Container(
+              padding: const EdgeInsets.all(16),
+
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+
+              child: Icon(
+                icon,
+                size: 34,
+                color: color,
+              ),
             ),
-            const SizedBox(height: 10),
-            Text(title,
-                style: const TextStyle(fontWeight: FontWeight.w600)),
+
+            const SizedBox(height: 16),
+
+            // 🔥 TITLE
+            Text(
+              title,
+              textAlign: TextAlign.center,
+
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ],
         ),
       ),
-    );
-  }
-
-  // 🔥 FIRESTORE LIVE COUNT
-  Widget _liveStat(String label, String collection) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection(collection).snapshots(),
-      builder: (context, snapshot) {
-        final count = snapshot.hasData ? snapshot.data!.docs.length : 0;
-
-        return Column(
-          children: [
-            Text(count.toString(),
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold)),
-            Text(label,
-                style: const TextStyle(color: Colors.white70)),
-          ],
-        );
-      },
     );
   }
 }

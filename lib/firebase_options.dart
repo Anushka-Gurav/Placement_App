@@ -59,31 +59,31 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCXB0Bgzw5doLRiFkeIHXMS6SctWXR4qfo',
-    appId: '1:377354438484:web:f5b1f6863c8046a7f12ac1',
-    messagingSenderId: '377354438484',
-    projectId: 'tpooffice-27b83',
-    authDomain: 'tpooffice-27b83.firebaseapp.com',
-    storageBucket: 'tpooffice-27b83.firebasestorage.app',
-    measurementId: 'G-EV5E836SWE',
+    apiKey: 'AIzaSyBAYNrGvW35sKdKky7pnp8X7YwhLkRzvOM',
+    appId: '1:708673337577:web:bb1c693963501066c19878',
+    messagingSenderId: '708673337577',
+    projectId: 'placement-app-22030',
+    authDomain: 'placement-app-22030.firebaseapp.com',
+    storageBucket: 'placement-app-22030.firebasestorage.app',
+    measurementId: 'G-P24ZP9W0RW',
   );
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCXB0Bgzw5doLRiFkeIHXMS6SctWXR4qfo',
-    appId: '1:377354438484:web:a793960ec0dffb9cf12ac1',
-    messagingSenderId: '377354438484',
-    projectId: 'tpooffice-27b83',
-    authDomain: 'tpooffice-27b83.firebaseapp.com',
-    storageBucket: 'tpooffice-27b83.firebasestorage.app',
-    measurementId: 'G-BG1HDCYPNN',
+    apiKey: 'AIzaSyBAYNrGvW35sKdKky7pnp8X7YwhLkRzvOM',
+    appId: '1:708673337577:web:826b66689dabc9d6c19878',
+    messagingSenderId: '708673337577',
+    projectId: 'placement-app-22030',
+    authDomain: 'placement-app-22030.firebaseapp.com',
+    storageBucket: 'placement-app-22030.firebasestorage.app',
+    measurementId: 'G-71L4E53JJ6',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAYyfy3DWt2yb3QzQDELyeudKjufr1-aIc',
-    appId: '1:377354438484:android:6bba10992680ed79f12ac1',
-    messagingSenderId: '377354438484',
-    projectId: 'tpooffice-27b83',
-    storageBucket: 'tpooffice-27b83.firebasestorage.app',
+    apiKey: 'AIzaSyD7-YMRR9qtdY3u-M2gomx9MGxR9n3wXtU',
+    appId: '1:708673337577:android:6fbf4d070d441683c19878',
+    messagingSenderId: '708673337577',
+    projectId: 'placement-app-22030',
+    storageBucket: 'placement-app-22030.firebasestorage.app',
   );
 
 }

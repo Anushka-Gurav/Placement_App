@@ -5,6 +5,14 @@ import 'student_detail_screen.dart';
 class AdminApplicationScreen extends StatelessWidget {
   const AdminApplicationScreen({super.key});
 
+  // 🔥 DELETE FUNCTION
+  Future<void> deleteApplication(String id) async {
+    await FirebaseFirestore.instance
+        .collection('applications')
+        .doc(id)
+        .delete();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,33 +63,76 @@ class AdminApplicationScreen extends StatelessWidget {
                     ),
 
                     children: list.map((app) {
+
+                      final doc = app;
                       final data =
-                      app.data() as Map<String, dynamic>;
+                      doc.data() as Map<String, dynamic>;
 
-                      return ListTile(
-                        leading: const Icon(Icons.person),
+                      return Dismissible(
+                        key: Key(doc.id),
 
-                        // ✅ FIXED NAME DISPLAY
-                        title: Text(
-                          data['userName'] != null &&
-                              data['userName'] != ""
-                              ? data['userName']
-                              : data['userEmail'] ?? "Student",
+                        direction: DismissDirection.endToStart,
+
+                        background: Container(
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          color: Colors.red,
+                          child: const Icon(Icons.delete, color: Colors.white),
                         ),
 
-                        subtitle:
-                        Text("Status: ${data['status']}"),
-
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  StudentDetailScreen(
-                                      student: data),
+                        // 🔥 CONFIRM DELETE (VERY IMPORTANT)
+                        confirmDismiss: (_) async {
+                          return await showDialog(
+                            context: context,
+                            builder: (_) => AlertDialog(
+                              title: const Text("Delete Application"),
+                              content: const Text("Are you sure?"),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text("Cancel"),
+                                ),
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, true),
+                                  child: const Text("Delete"),
+                                ),
+                              ],
                             ),
                           );
                         },
+
+                        onDismissed: (_) async {
+                          await deleteApplication(doc.id);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Application Deleted")),
+                          );
+                        },
+
+                        child: ListTile(
+                          leading: const Icon(Icons.person),
+
+                          title: Text(
+                            data['userName'] != null &&
+                                data['userName'] != ""
+                                ? data['userName']
+                                : data['userEmail'] ?? "Student",
+                          ),
+
+                          subtitle: Text("Status: ${data['status']}"),
+
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    StudentDetailScreen(student: data),
+                              ),
+                            );
+                          },
+                        ),
                       );
                     }).toList(),
                   ),

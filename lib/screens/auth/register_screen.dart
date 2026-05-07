@@ -21,9 +21,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String selectedYear = "Second Year";
 
   bool isLoading = false;
+  bool isPasswordVisible = false; // 🔥 NEW
 
   final branches = ["Computer", "IT", "ENTC", "Mechanical", "Civil"];
   final years = ["First Year", "Second Year", "Third Year", "Fourth Year"];
+
+  // 🔥 ERROR DIALOG
+  void showError(String msg) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error, color: Colors.red, size: 60),
+            const SizedBox(height: 10),
+            Text(msg),
+          ],
+        ),
+      ),
+    );
+  }
 
   void register() async {
     setState(() => isLoading = true);
@@ -47,7 +66,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         cgpa: cgpa.text,
       );
 
-      // ✅ SUCCESS POPUP
+      // ✅ SUCCESS DIALOG
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -68,12 +87,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       await Future.delayed(const Duration(seconds: 2));
 
-      Navigator.pop(context);
-      Navigator.pop(context);
+      Navigator.pop(context); // close dialog
+      Navigator.pop(context); // go back to login
 
     } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(e.message ?? "Error")));
+      String message = "Registration Failed";
+
+      switch (e.code) {
+        case 'email-already-in-use':
+          message = "Email already registered";
+          break;
+        case 'weak-password':
+          message = "Password should be at least 6 characters";
+          break;
+        case 'invalid-email':
+          message = "Invalid email format";
+          break;
+      }
+
+      showError(message);
     }
 
     setState(() => isLoading = false);
@@ -83,11 +115,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+
+        // 🔥 UPDATED THEME GRADIENT
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF6C63FF), Color(0xFF8E2DE2)],
+            colors: [
+              Color(0xFF141836),
+              Color(0xFF1E234D),
+            ],
           ),
         ),
+
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
@@ -116,10 +154,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                     const SizedBox(height: 10),
 
+                    // 🔥 PASSWORD WITH EYE ICON
                     TextField(
                       controller: password,
-                      obscureText: true,
-                      decoration: _input("Password", Icons.lock),
+                      obscureText: !isPasswordVisible,
+                      decoration: _input("Password", Icons.lock).copyWith(
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            isPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              isPasswordVisible = !isPasswordVisible;
+                            });
+                          },
+                        ),
+                      ),
                     ),
 
                     const SizedBox(height: 10),
@@ -171,15 +223,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 20),
 
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        minimumSize:
-                        const Size(double.infinity, 50),
-                      ),
                       onPressed: isLoading ? null : register,
                       child: isLoading
                           ? const CircularProgressIndicator(
                           color: Colors.white)
                           : const Text("Register"),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // 🔥 LOGIN REDIRECT
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Already a user? "),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: const Text(
+                            "Login",
+                            style: TextStyle(
+                              color: Color(0xFF141836),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     )
                   ],
                 ),
