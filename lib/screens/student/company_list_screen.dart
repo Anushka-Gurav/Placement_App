@@ -106,8 +106,6 @@ class CompanyListScreen extends StatelessWidget {
                             CompanyDetailScreen(
 
                               companyId: doc.id,
-
-                              company: c,
                             ),
                       ),
                     );
@@ -336,7 +334,7 @@ class CompanyListScreen extends StatelessWidget {
                                         companyId:
                                         doc.id,
 
-                                        company: c,
+
                                       ),
                                 ),
                               );
