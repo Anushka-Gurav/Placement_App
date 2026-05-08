@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../auth/login_screen.dart';
-
+import 'my_applications_screen.dart';
 import 'company_list_screen.dart';
 import 'profile_screen.dart';
 import 'notification_screen.dart';
@@ -198,6 +198,13 @@ class StudentDashboard extends StatelessWidget {
                     Icons.chat,
                     const ChatbotScreen(),
                     Colors.indigo,
+                  ),
+                  _card(
+                    context,
+                    "My Applications",
+                    Icons.assignment,
+                    const MyApplicationsScreen(),
+                    Colors.green,
                   ),
                 ],
               ),

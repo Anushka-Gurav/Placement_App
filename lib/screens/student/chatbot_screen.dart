@@ -19,6 +19,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
   // 🔥 KEYWORDS RELATED TO TNP
   final tnpKeywords = [
+    "hi",
+    "hello",
     "company",
     "placement",
     "apply",
@@ -74,6 +76,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   // 🔥 INTENT DETECTION
   Map<String, dynamic> getBotResponse(String text) {
 
+    if(text.contains("Hi")|| text.contains("Hello"))
+      {
+        return {
+          "msg": "Hello, Welcome to Placement Cell",
+        };
+      }
     if (text.contains("company") || text.contains("job")) {
       return {
         "msg": "Here are the available companies.",

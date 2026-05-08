@@ -5,36 +5,52 @@ import 'package:firebase_auth/firebase_auth.dart';
 class QuizAttemptScreen extends StatefulWidget {
   final QueryDocumentSnapshot resource;
 
-  const QuizAttemptScreen({super.key, required this.resource});
+  const QuizAttemptScreen({
+    super.key,
+    required this.resource,
+  });
 
   @override
-  State<QuizAttemptScreen> createState() => _QuizAttemptScreenState();
+  State<QuizAttemptScreen> createState() =>
+      _QuizAttemptScreenState();
 }
 
-class _QuizAttemptScreenState extends State<QuizAttemptScreen> {
+class _QuizAttemptScreenState
+    extends State<QuizAttemptScreen> {
 
-  List answers = [];
+  late List questions;
+
+  List<int?> answers = [];
+
   bool submitted = false;
   int score = 0;
+
+  final labels = ["A", "B", "C", "D"];
 
   @override
   void initState() {
     super.initState();
 
-    final questions = widget.resource['questions'];
-    answers = List.filled(questions.length, null);
+    questions = widget.resource['questions'];
+
+    answers =
+    List<int?>.filled(questions.length, null);
 
     checkAlreadyAttempted();
   }
 
+  // 🔥 CHECK ATTEMPT
   Future<void> checkAlreadyAttempted() async {
 
-    final user = FirebaseAuth.instance.currentUser;
+    final user =
+        FirebaseAuth.instance.currentUser;
 
     final res = await FirebaseFirestore.instance
         .collection('quiz_attempts')
-        .where("userId", isEqualTo: user!.uid)
-        .where("quizId", isEqualTo: widget.resource.id)
+        .where("userId",
+        isEqualTo: user!.uid)
+        .where("quizId",
+        isEqualTo: widget.resource.id)
         .get();
 
     if (res.docs.isNotEmpty) {
@@ -43,42 +59,59 @@ class _QuizAttemptScreenState extends State<QuizAttemptScreen> {
 
       setState(() {
         submitted = true;
-        answers = List.from(data['answers']);
+
+        answers =
+        List<int?>.from(data['answers']);
+
         score = data['score'];
       });
     }
   }
 
-  void submitQuiz() async {
+  // 🔥 SUBMIT QUIZ
+  Future<void> submitQuiz() async {
 
-    final user = FirebaseAuth.instance.currentUser;
+    final user =
+        FirebaseAuth.instance.currentUser;
 
-    final userDoc = await FirebaseFirestore.instance
+    final userDoc =
+    await FirebaseFirestore.instance
         .collection('users')
         .doc(user!.uid)
         .get();
 
     final userData = userDoc.data();
 
-    final questions = widget.resource['questions'];
-
     int tempScore = 0;
 
-    for (int i = 0; i < questions.length; i++) {
-      if (answers[i] == questions[i]['correct']) {
+    for (int i = 0;
+    i < questions.length;
+    i++) {
+
+      if (answers[i] ==
+          questions[i]['correctIndex']) {
         tempScore++;
       }
     }
 
-    await FirebaseFirestore.instance.collection('quiz_attempts').add({
+    // 🔥 SAVE ATTEMPT
+    await FirebaseFirestore.instance
+        .collection('quiz_attempts')
+        .add({
+
       "userId": user.uid,
       "userName": userData?['name'],
       "userEmail": userData?['email'],
+
       "quizId": widget.resource.id,
+
       "answers": answers,
+
       "score": tempScore,
       "total": questions.length,
-      "submittedAt": DateTime.now(),
+
+      "submittedAt":
+      FieldValue.serverTimestamp(),
     });
 
     setState(() {
@@ -90,57 +123,88 @@ class _QuizAttemptScreenState extends State<QuizAttemptScreen> {
   @override
   Widget build(BuildContext context) {
 
-    final questions = widget.resource['questions'];
-
     return Scaffold(
-      appBar: AppBar(title: Text(widget.resource['title'])),
+
+      appBar: AppBar(
+        title: Text(widget.resource['title']),
+      ),
 
       body: submitted
-          ? _resultView(questions)
-          : _quizView(questions),
+          ? resultView()
+          : quizView(),
 
       floatingActionButton: submitted
           ? null
           : FloatingActionButton(
+        backgroundColor:
+        const Color(0xFF141836),
+
         onPressed: submitQuiz,
+
         child: const Icon(Icons.check),
       ),
     );
   }
 
-  // 🔥 QUIZ UI
-  Widget _quizView(List questions) {
+  // 🔥 QUIZ VIEW
+  Widget quizView() {
+
     return ListView.builder(
       itemCount: questions.length,
+
       itemBuilder: (_, i) {
 
         final q = questions[i];
 
         return Card(
           margin: const EdgeInsets.all(10),
+
           child: Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(15),
+
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+              CrossAxisAlignment.start,
+
               children: [
 
-                Text(q['question'],
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold)),
+                Text(
+                  "Q${i + 1}. ${q['question']}",
 
-                ...["A","B","C","D"].map((opt) {
+                  style: const TextStyle(
+                    fontWeight:
+                    FontWeight.bold,
+                    fontSize: 17,
+                  ),
+                ),
 
-                  return RadioListTile(
-                    value: opt,
-                    groupValue: answers[i],
-                    title: Text(q[opt]),
-                    onChanged: (val) {
-                      setState(() {
-                        answers[i] = val;
-                      });
-                    },
-                  );
-                }),
+                const SizedBox(height: 10),
+
+                // 🔥 OPTIONS
+                ...List.generate(
+                  q['options'].length,
+                      (optIndex) {
+
+                    return RadioListTile<int>(
+
+                      value: optIndex,
+
+                      groupValue:
+                      answers[i],
+
+                      title: Text(
+                        "${labels[optIndex]}. ${q['options'][optIndex]}",
+                      ),
+
+                      onChanged: (val) {
+
+                        setState(() {
+                          answers[i] = val;
+                        });
+                      },
+                    );
+                  },
+                ),
               ],
             ),
           ),
@@ -149,70 +213,148 @@ class _QuizAttemptScreenState extends State<QuizAttemptScreen> {
     );
   }
 
-  // 🔥 RESULT UI
-  Widget _resultView(List questions) {
+  // 🔥 RESULT VIEW
+  Widget resultView() {
 
     return ListView(
       children: [
 
-        const SizedBox(height: 10),
+        const SizedBox(height: 20),
 
-        // SCORE
+        // 🔥 SCORE
         Center(
-          child: Text(
-            "Score: $score / ${questions.length}",
-            style: const TextStyle(
-                fontSize: 20, fontWeight: FontWeight.bold),
+          child: Container(
+            padding:
+            const EdgeInsets.all(18),
+
+            decoration: BoxDecoration(
+              color: const Color(0xFF141836),
+              borderRadius:
+              BorderRadius.circular(16),
+            ),
+
+            child: Text(
+              "Score: $score / ${questions.length}",
+
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight:
+                FontWeight.bold,
+                fontSize: 22,
+              ),
+            ),
           ),
         ),
 
         const SizedBox(height: 20),
 
-        ...List.generate(questions.length, (i) {
+        // 🔥 QUESTIONS REVIEW
+        ...List.generate(
+          questions.length,
+              (i) {
 
-          final q = questions[i];
-          final correct = q['correct'];
-          final userAns = answers[i];
+            final q = questions[i];
 
-          return Card(
-            margin: const EdgeInsets.all(10),
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            final correctIndex =
+            q['correctIndex'];
 
-                  Text(q['question'],
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold)),
+            final userAns = answers[i];
 
-                  const SizedBox(height: 10),
+            return Card(
+              margin:
+              const EdgeInsets.all(10),
 
-                  ...["A","B","C","D"].map((opt) {
+              child: Padding(
+                padding:
+                const EdgeInsets.all(15),
 
-                    Color? bg;
+                child: Column(
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
 
-                    if (opt == correct) {
-                      bg = Colors.green.withOpacity(0.3);
-                    } else if (opt == userAns && opt != correct) {
-                      bg = Colors.red.withOpacity(0.3);
-                    }
+                  children: [
 
-                    return Container(
-                      margin: const EdgeInsets.symmetric(vertical: 3),
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: bg,
-                        borderRadius: BorderRadius.circular(10),
+                    Text(
+                      "Q${i + 1}. ${q['question']}",
+
+                      style:
+                      const TextStyle(
+                        fontWeight:
+                        FontWeight.bold,
+                        fontSize: 17,
                       ),
-                      child: Text("$opt. ${q[opt]}"),
-                    );
-                  }),
-                ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    ...List.generate(
+                      q['options'].length,
+                          (optIndex) {
+
+                        Color? bg;
+
+                        // ✅ CORRECT
+                        if (optIndex ==
+                            correctIndex) {
+
+                          bg = Colors.green
+                              .withOpacity(0.25);
+                        }
+
+                        // ❌ WRONG SELECTED
+                        else if (optIndex ==
+                            userAns) {
+
+                          bg = Colors.red
+                              .withOpacity(0.25);
+                        }
+
+                        return Container(
+                          margin:
+                          const EdgeInsets.symmetric(
+                              vertical: 4),
+
+                          padding:
+                          const EdgeInsets.all(12),
+
+                          decoration:
+                          BoxDecoration(
+                            color: bg,
+                            borderRadius:
+                            BorderRadius.circular(
+                                12),
+                          ),
+
+                          child: Row(
+                            children: [
+
+                              Text(
+                                "${labels[optIndex]}. ",
+
+                                style:
+                                const TextStyle(
+                                  fontWeight:
+                                  FontWeight.bold,
+                                ),
+                              ),
+
+                              Expanded(
+                                child: Text(
+                                  q['options']
+                                  [optIndex],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        })
+            );
+          },
+        ),
       ],
     );
   }

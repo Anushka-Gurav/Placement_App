@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import '../auth/login_screen.dart';
-
+import '../student/experience_wall_screen.dart';
+import 'admin_experience_screen.dart';
 import 'add_company_screen.dart';
 import 'admin_company_list_screen.dart';
 import 'admin_application_screen.dart';
 import 'admin_notification_screen.dart';
 import 'admin_students_year_screen.dart';
-
+import '../admin/placement_analytics_screen.dart';
 import 'add_resource_screen.dart';
 import 'admin_resource_list_screen.dart';
 
@@ -188,6 +188,34 @@ class AdminDashboard extends StatelessWidget {
                     const AdminResourceListScreen(),
                     Colors.purple,
                   ),
+
+                  _card(
+                    context,
+                    "Moderate Experience",
+                    Icons.rate_review,
+                    const AdminExperienceScreen(),
+                    const Color(0xFF1F3C44),
+                  ),
+
+
+                  // 🔥 ANALYTICS
+                  _card(
+                    context,
+                    "Analytics",
+                    Icons.insert_chart,
+                    const PlacementAnalyticsScreen(),
+                    Colors.green,
+                  ),
+
+                  // 🔥 EXPERIENCE WALL
+                  _card(
+                    context,
+                    "Experience Wall",
+                    Icons.forum,
+                    const ExperienceWallScreen(),
+                    Colors.pink,
+                  ),
+
                 ],
               ),
             ),

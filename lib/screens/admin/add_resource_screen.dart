@@ -19,20 +19,28 @@ class _AddResourceScreenState extends State<AddResourceScreen> {
 
   void submit() async {
 
+    if (title.text.trim().isEmpty) return;
+
     if (type == "quiz") {
+
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => QuizBuilderScreen(title: title.text),
+          builder: (_) => QuizBuilderScreen(
+            title: title.text.trim(),
+          ),
         ),
       );
+
       return;
     }
 
+    if (link.text.trim().isEmpty) return;
+
     await service.addResource({
-      "title": title.text,
-      "type": type,
-      "link": link.text,
+      "title": title.text.trim(),
+      "type": "link",
+      "link": link.text.trim(),
       "createdAt": DateTime.now(),
     });
 
@@ -59,7 +67,6 @@ class _AddResourceScreenState extends State<AddResourceScreen> {
               value: type,
               items: const [
                 DropdownMenuItem(value: "quiz", child: Text("Quiz")),
-                DropdownMenuItem(value: "pdf", child: Text("PDF")),
                 DropdownMenuItem(value: "link", child: Text("Link")),
               ],
               onChanged: (val) => setState(() => type = val!),
